@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Universal Stationary</title>
+<style>
+:root{
+  --bg:#1e1e1e; --card-bg:#2a2a2a; --text:#f0f0f0; --muted:#a0a0a0;
+  --accent:#ffcc00; --shadow:0 6px 18px rgba(0,0,0,0.5);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;}
+header{position:sticky;top:0;background:rgba(40,40,40,0.95);padding:14px;z-index:50;}
+.nav{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;}
+.nav .logo{font-weight:700;font-size:20px;color:var(--accent);}
+nav ul{list-style:none;display:flex;gap:18px;}
+nav a{color:var(--text);text-decoration:none;padding:8px 12px;border-radius:8px;cursor:pointer;transition:.25s;}
+nav a:hover{background:rgba(255,255,255,0.1);}
+section{max-width:1100px;margin:36px auto;padding:0 18px;display:none;}
+section.active{display:block;}
+.card{background:var(--card-bg);padding:22px;border-radius:14px;box-shadow:var(--shadow);margin-bottom:36px;}
+.bio{font-size:16px;line-height:1.5;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;}
+.product{background:linear-gradient(180deg,#333,#2a2a2a);padding:12px;border-radius:12px;display:flex;gap:12px;align-items:center;transition:all .25s;}
+.product:hover{transform:translateY(-6px);box-shadow:0 18px 30px rgba(0,0,0,0.6);}
+.thumb{width:60px;height:60px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--accent);color:#1e1e1e;}
+.p-info h4{margin:0 0 6px;}
+.p-info p{margin:0;color:var(--muted);font-size:13px;}
+.particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:-1;}
+.particle{position:absolute;border-radius:50%;background:var(--accent);width:6px;height:6px;opacity:0.5;animation:float 10s infinite;}
+@keyframes float{0%{transform:translateY(0px)}50%{transform:translateY(-20px)}100%{transform:translateY(0px)}}
+</style>
+</head>
+<body>
+<div class="particles" id="particles"></div>
+<header>
+  <div class="nav">
+    <div class="logo">Universal Stationary</div>
+    <nav>
+      <ul>
+        <li><a onclick="showPage('home')">Home</a></li>
+        <li><a onclick="showPage('shop')">Shop</a></li>
+        <li><a onclick="showPage('services')">Services</a></li>
+        <li><a onclick="showPage('contact')">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- Home -->
+  <section id="home" class="active card">
+    <h1>Welcome to Universal Stationary</h1>
+    <div class="bio">
+      📍 Saroor Nagar, Hyderabad<br>
+      🎒 School • 📚 College • 🖊️ Office Supplies<br>
+      🖨️ Xerox | 🔑 Keychains | 🍦 Ice Creams<br>
+      ✨ Everything you need in one place
+    </div>
+  </section>
+
+  <!-- Shop -->
+  <section id="shop">
+    <div class="card">
+      <h2>Stationery & Study</h2>
+      <div class="grid" id="stationery"></div>
+    </div>
+    <div class="card">
+      <h2>Snacks & Dairy</h2>
+      <div class="grid" id="snacks"></div>
+    </div>
+    <div class="card">
+      <h2>Personal & General</h2>
+      <div class="grid" id="personal"></div>
+    </div>
+  </section>
+
+  <!-- Services -->
+  <section id="services" class="card">
+    <h2>Our Services</h2>
+    <div class="grid" id="services-grid"></div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact" class="card">
+    <h2>Contact Us</h2>
+    <div class="card">Instagram: @universalstationary2019</div>
+    <div class="card">WhatsApp: 8978431514</div>
+    <div class="card">Email: amk31514@gmail.com</div>
+  </section>
+</main>
+
+<script>
+// Particle effect
+const particles=document.getElementById('particles');
+for(let i=0;i<80;i++){
+  const p=document.createElement('div');
+  p.className='particle';
+  p.style.top=Math.random()*window.innerHeight+'px';
+  p.style.left=Math.random()*window.innerWidth+'px';
+  p.style.width=p.style.height=(Math.random()*6+4)+'px';
+  p.style.animationDuration=(Math.random()*5+5)+'s';
+  particles.appendChild(p);
+}
+
+// Page navigation
+function showPage(id){
+  document.querySelectorAll('section').forEach(sec=>sec.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// Products Data
+const data = {
+  stationery:[
+    {name:'Books',desc:'Notebooks, exercise books & textbooks'},
+    {name:'Pens',desc:'Ball pens, gel pens, markers'},
+    {name:'Exam Pads',desc:'All kinds of exam pads'},
+    {name:'Files',desc:'Folders & binders'},
+    {name:'Paper Charts',desc:'Charts for projects & display'},
+    {name:'Govt Textbooks (6-10)',desc:'Class 6-10 textbooks'},
+    {name:'Xerox',desc:'Photocopy services'},
+    {name:'Print',desc:'Color & B/W printing'},
+    {name:'Lamination',desc:'A4 and custom sizes'}
+  ],
+  snacks:[
+    {name:'Ice Creams',desc:'Various flavors'},
+    {name:'Milk',desc:'Fresh milk bottles'},
+    {name:'Curd',desc:'Homemade curd'},
+    {name:'Chips',desc:'Different brands'},
+    {name:'Cold Drinks',desc:'Soft drinks'},
+    {name:'Chocolates',desc:'Various brands'}
+  ],
+  personal:[
+    {name:'Toothpaste & Brush',desc:'All brands'},
+    {name:'Shampoo & Soaps',desc:'Hair & body care'},
+    {name:'Perfumes',desc:'Fragrances for men & women'}
+  ],
+  services:[
+    {name:'Train Booking',desc:'Assistance with ticket booking'},
+    {name:'Passport Apply',desc:'Guidance for passport applications'},
+    {name:'Xerox',desc:'High-quality photocopy service'},
+    {name:'Print',desc:'Color & B/W printing'},
+    {name:'Lamination',desc:'A4 and custom sizes'}
+  ]
+};
+
+// Render all items
+for(const [key,arr] of Object.entries(data)){
+  const container=document.getElementById(key==='services'?'services-grid':key);
+  arr.forEach(item=>{
+    const el=document.createElement('div');
+    el.className='product';
+    el.innerHTML=`<div class="thumb">📦</div><div class="p-info"><h4>${item.name}</h4><p>${item.desc}</p></div>`;
+    container.appendChild(el);
+  });
+}
+</script>
+</body>
+</html>
