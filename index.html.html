@@ -1,160 +1,379 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Universal Stationary</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>ESP32 2-in-1 Smart Car 🚗⚡</title>
+
 <style>
-:root{
-  --bg:#1e1e1e; --card-bg:#2a2a2a; --text:#f0f0f0; --muted:#a0a0a0;
-  --accent:#ffcc00; --shadow:0 6px 18px rgba(0,0,0,0.5);
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
+
+* { 
+  margin:0; 
+  padding:0; 
+  box-sizing:border-box; 
+  font-family:'Orbitron',sans-serif; 
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;}
-header{position:sticky;top:0;background:rgba(40,40,40,0.95);padding:14px;z-index:50;}
-.nav{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;}
-.nav .logo{font-weight:700;font-size:20px;color:var(--accent);}
-nav ul{list-style:none;display:flex;gap:18px;}
-nav a{color:var(--text);text-decoration:none;padding:8px 12px;border-radius:8px;cursor:pointer;transition:.25s;}
-nav a:hover{background:rgba(255,255,255,0.1);}
-section{max-width:1100px;margin:36px auto;padding:0 18px;display:none;}
-section.active{display:block;}
-.card{background:var(--card-bg);padding:22px;border-radius:14px;box-shadow:var(--shadow);margin-bottom:36px;}
-.bio{font-size:16px;line-height:1.5;}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;}
-.product{background:linear-gradient(180deg,#333,#2a2a2a);padding:12px;border-radius:12px;display:flex;gap:12px;align-items:center;transition:all .25s;}
-.product:hover{transform:translateY(-6px);box-shadow:0 18px 30px rgba(0,0,0,0.6);}
-.thumb{width:60px;height:60px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--accent);color:#1e1e1e;}
-.p-info h4{margin:0 0 6px;}
-.p-info p{margin:0;color:var(--muted);font-size:13px;}
-.particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:-1;}
-.particle{position:absolute;border-radius:50%;background:var(--accent);width:6px;height:6px;opacity:0.5;animation:float 10s infinite;}
-@keyframes float{0%{transform:translateY(0px)}50%{transform:translateY(-20px)}100%{transform:translateY(0px)}}
+
+body {
+  min-height:100vh;
+  background:#000;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px;
+  overflow-x:hidden;
+}
+
+canvas#particles { 
+  position:fixed; 
+  top:0; 
+  left:0; 
+  width:100%; 
+  height:100%; 
+  z-index:-1; 
+}
+
+/* Loader */
+#loading {
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:#000;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:50;
+}
+
+.spinner{
+  position:relative;
+  width:80px;
+  height:80px;
+  margin-bottom:15px;
+}
+.spinner div{
+  position:absolute;
+  border:5px solid transparent;
+  border-top:5px solid #0ff;
+  border-radius:50%;
+  width:100%; height:100%;
+  animation:spin 1s linear infinite;
+}
+.spinner div:nth-child(2){
+  border-top-color:#0ff;
+  width:65%; height:65%;
+  top:17.5%; left:17.5%;
+  animation-duration:1.5s;
+}
+.spinner div:nth-child(3){
+  border-top-color:#0ff;
+  width:35%; height:35%;
+  top:32.5%; left:32.5%;
+  animation-duration:2s;
+}
+
+@keyframes spin{
+  0%{transform:rotate(0deg);}
+  100%{transform:rotate(360deg);}
+}
+
+/* Home Container */
+.container{
+  text-align:center;
+  opacity:0;
+  transition:opacity 1s ease-in-out;
+  max-width:100%;
+  width:100%;
+  padding:10px;
+}
+.container.show{ opacity:1; }
+
+h1{
+  font-size:2em;
+  color:#0ff;
+  text-shadow:0 0 8px #0ff,0 0 20px #0ff;
+  margin-bottom:15px;
+}
+
+p{
+  font-size:0.95em;
+  line-height:1.4em;
+  margin-bottom:8px;
+}
+
+button{
+  background:transparent;
+  border:2px solid #0ff;
+  color:#0ff;
+  padding:10px 15px;
+  margin:6px auto;
+  cursor:pointer;
+  font-size:1em;
+  border-radius:8px;
+  transition:all 0.3s;
+  width:90%;
+  max-width:220px;
+  display:block;
+}
+button:hover{
+  background:#0ff;
+  color:#000;
+  box-shadow:0 0 12px #0ff,0 0 25px #0ff;
+}
+
+/* Sections */
+section{
+  display:none;
+  opacity:0;
+  transform:translateY(20px);
+  animation:none;
+  border-radius:12px;
+  padding:15px;
+  background:rgba(0,0,0,0.55);
+  box-shadow:0 0 12px #0ff,0 0 25px #0ff;
+  transition:all 0.5s ease-out;
+  max-height:85vh;
+  overflow-y:auto;
+  width:95%;
+  margin:auto;
+}
+section.active{
+  display:block;
+  animation:slideIn 0.6s forwards;
+}
+
+@keyframes slideIn{
+  0%{opacity:0;transform:translateY(40px);}
+  50%{opacity:1;transform:translateY(-5px);}
+  100%{opacity:1;transform:translateY(0);}
+}
+
+.back-btn{
+  margin-top:15px;
+  border-color:#0ff;
+  color:#0ff;
+}
+.back-btn:hover{
+  background:#0ff;
+  color:#000;
+}
+
+/* Music Toggle */
+.music-toggle{
+  position:fixed;
+  top:12px; right:12px;
+  background:rgba(0,255,255,0.25);
+  border:1px solid #0ff;
+  padding:5px 8px;
+  border-radius:5px;
+  cursor:pointer;
+  color:#0ff;
+  transition:0.3s;
+  font-size:0.9em;
+}
+.music-toggle:hover{
+  background:rgba(0,255,255,0.5);
+}
+
+/* Footer */
+footer{
+  position:fixed;
+  bottom:5px;
+  width:100%;
+  text-align:center;
+  font-size:0.8em;
+  color:#aaa;
+}
+
+/* Responsive Text */
+@media (max-width:480px){
+  h1{ font-size:1.6em; }
+  p{ font-size:0.9em; }
+  button{ font-size:0.95em; max-width:200px; }
+  section{ padding:12px; }
+}
 </style>
 </head>
 <body>
-<div class="particles" id="particles"></div>
-<header>
-  <div class="nav">
-    <div class="logo">Universal Stationary</div>
-    <nav>
-      <ul>
-        <li><a onclick="showPage('home')">Home</a></li>
-        <li><a onclick="showPage('shop')">Shop</a></li>
-        <li><a onclick="showPage('services')">Services</a></li>
-        <li><a onclick="showPage('contact')">Contact</a></li>
-      </ul>
-    </nav>
-  </div>
-</header>
 
-<main>
-  <!-- Home -->
-  <section id="home" class="active card">
-    <h1>Welcome to Universal Stationary</h1>
-    <div class="bio">
-      📍 Saroor Nagar, Hyderabad<br>
-      🎒 School • 📚 College • 🖊️ Office Supplies<br>
-      🖨️ Xerox | 🔑 Keychains | 🍦 Ice Creams<br>
-      ✨ Everything you need in one place
-    </div>
-  </section>
+<canvas id="particles"></canvas>
 
-  <!-- Shop -->
-  <section id="shop">
-    <div class="card">
-      <h2>Stationery & Study</h2>
-      <div class="grid" id="stationery"></div>
-    </div>
-    <div class="card">
-      <h2>Snacks & Dairy</h2>
-      <div class="grid" id="snacks"></div>
-    </div>
-    <div class="card">
-      <h2>Personal & General</h2>
-      <div class="grid" id="personal"></div>
-    </div>
-  </section>
+<div class="music-toggle" onclick="toggleMusic()">🎵 Music: ON</div>
 
-  <!-- Services -->
-  <section id="services" class="card">
-    <h2>Our Services</h2>
-    <div class="grid" id="services-grid"></div>
-  </section>
+<audio id="bgMusic" loop autoplay>
+  <source src="happy-vibes.mp3" type="audio/mp3">
+</audio>
 
-  <!-- Contact -->
-  <section id="contact" class="card">
-    <h2>Contact Us</h2>
-    <div class="card">Instagram: @universalstationary2019</div>
-    <div class="card">WhatsApp: 8978431514</div>
-    <div class="card">Email: amk31514@gmail.com</div>
-  </section>
-</main>
+<!-- Loading -->
+<div id="loading">
+  <div class="spinner"><div></div><div></div><div></div></div>
+  <p>Loading...</p>
+</div>
+
+<!-- Main Container -->
+<div class="container" id="home">
+  <h1>ESP32 2-in-1 Smart Car 🚗⚡</h1>
+  <p>Voice Control • WiFi Control 🌟</p>
+
+  <button onclick="show('voice')">Voice Control 🎤</button>
+  <button onclick="show('wifi')">WiFi Control 🌐</button>
+  <button onclick="show('features')">Features ⚙</button>
+  <button onclick="show('components')">Components 🔩</button>
+  <button onclick="show('how')">How It Works 🔧</button>
+  <button onclick="show('uses')">Uses 💡</button>
+  <button onclick="show('team')">Team 👥</button>
+</div>
+
+<!-- Sections -->
+<section id="voice">
+  <h1>Voice Control 🎤</h1>
+  <p>Control the smart car using voice commands via a mobile app. Commands are sent to the ESP32 via WiFi.</p>
+  <p>Example Commands:<br>• Forward<br>• Backward<br>• Left<br>• Right<br>• Stop</p>
+  <button class="back-btn" onclick="back()">⬅ Back</button>
+</section>
+
+<section id="wifi">
+  <h1>WiFi Control 🌐</h1>
+  <p>Control your ESP32 Smart Car over WiFi. Connect your mobile or PC to the ESP32 hotspot and send commands to drive the car.</p>
+  <p>Example Commands:<br>• Forward<br>• Backward<br>• Left<br>• Right<br>• Stop</p>
+  <button class="back-btn" onclick="back()">⬅ Back</button>
+</section>
+
+<section id="features">
+  <h1>Smart Features ⚙</h1>
+  <p>🌐 WiFi control.<br>🗣 Voice commands.<br>🌈 RGB lights.<br>⚙ Smooth motor control.</p>
+  <button class="back-btn" onclick="back()">⬅ Back</button>
+</section>
+
+<section id="components">
+  <h1>Components Used 🔩</h1>
+  <p><strong>1. ESP32 Dev Module</strong><br>Powerful WiFi + Bluetooth microcontroller used for IoT robotics.</p>
+  <p><strong>2. L298N Motor Driver</strong><br>Controls two DC motors with forward-backward motion.</p>
+  <p><strong>3. DC Motors</strong><br>Convert electricity into rotation to move the vehicle.</p>
+  <p><strong>4. Chassis Kit</strong><br>Strong base with wheels + mounts.</p>
+  <p><strong>5. Breadboard</strong><br>Allows no-solder circuit building.</p>
+  <p><strong>6. Battery Holder</strong><br>Supplies stable power.</p>
+  <p><strong>7. Jumper Wires</strong><br>Connect all electronic components.</p>
+  <button class="back-btn" onclick="back()">⬅ Back</button>
+</section>
+
+<section id="how">
+  <h1>How It Works 🔧</h1>
+  <p>This is a low-cost WiFi-controlled robotic vehicle built using ESP32. It can work without internet and is useful for schools, robotics learning, rural applications, and smart automation.</p>
+  <p>It generates its own WiFi hotspot, so users can control it even in remote areas. Useful for education, environment monitoring, and basic surveillance.</p>
+  <button class="back-btn" onclick="back()">⬅ Back</button>
+</section>
+
+<section id="uses">
+  <h1>Uses 💡</h1>
+  <p>🎓 Educational robotics<br>🧠 Learning electronics<br>🚀 Automation demos<br>🤖 Smart car projects</p>
+  <button class="back-btn" onclick="back()">⬅ Back</button>
+</section>
+
+<section id="team">
+  <h1>Team 👥</h1>
+  <p>💎 Sudaim & Mithun Raj (9M1)<br>🎨 Webpage for Expo</p>
+  <button class="back-btn" onclick="back()">⬅ Back</button>
+</section>
+
+<footer>By Sudaim & Mithun Raj </footer>
 
 <script>
-// Particle effect
-const particles=document.getElementById('particles');
-for(let i=0;i<80;i++){
-  const p=document.createElement('div');
-  p.className='particle';
-  p.style.top=Math.random()*window.innerHeight+'px';
-  p.style.left=Math.random()*window.innerWidth+'px';
-  p.style.width=p.style.height=(Math.random()*6+4)+'px';
-  p.style.animationDuration=(Math.random()*5+5)+'s';
-  particles.appendChild(p);
-}
+// LOADER
+const loading=document.getElementById('loading');
+const container=document.querySelector('.container');
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    triggerBlast();
+    setTimeout(()=>{
+      loading.style.display='none';
+      container.classList.add('show');
+    },500);
+  },3000);
+});
 
-// Page navigation
-function showPage(id){
-  document.querySelectorAll('section').forEach(sec=>sec.classList.remove('active'));
+// Show / Back
+const sections=document.querySelectorAll('section');
+function show(id){
+  document.getElementById('home').style.display='none';
+  sections.forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
+function back(){
+  sections.forEach(s=>s.classList.remove('active'));
+  document.getElementById('home').style.display='block';
+}
 
-// Products Data
-const data = {
-  stationery:[
-    {name:'Books',desc:'Notebooks, exercise books & textbooks'},
-    {name:'Pens',desc:'Ball pens, gel pens, markers'},
-    {name:'Exam Pads',desc:'All kinds of exam pads'},
-    {name:'Files',desc:'Folders & binders'},
-    {name:'Paper Charts',desc:'Charts for projects & display'},
-    {name:'Govt Textbooks (6-10)',desc:'Class 6-10 textbooks'},
-    {name:'Xerox',desc:'Photocopy services'},
-    {name:'Print',desc:'Color & B/W printing'},
-    {name:'Lamination',desc:'A4 and custom sizes'}
-  ],
-  snacks:[
-    {name:'Ice Creams',desc:'Various flavors'},
-    {name:'Milk',desc:'Fresh milk bottles'},
-    {name:'Curd',desc:'Homemade curd'},
-    {name:'Chips',desc:'Different brands'},
-    {name:'Cold Drinks',desc:'Soft drinks'},
-    {name:'Chocolates',desc:'Various brands'}
-  ],
-  personal:[
-    {name:'Toothpaste & Brush',desc:'All brands'},
-    {name:'Shampoo & Soaps',desc:'Hair & body care'},
-    {name:'Perfumes',desc:'Fragrances for men & women'}
-  ],
-  services:[
-    {name:'Train Booking',desc:'Assistance with ticket booking'},
-    {name:'Passport Apply',desc:'Guidance for passport applications'},
-    {name:'Xerox',desc:'High-quality photocopy service'},
-    {name:'Print',desc:'Color & B/W printing'},
-    {name:'Lamination',desc:'A4 and custom sizes'}
-  ]
-};
+// Music Toggle
+const music=document.getElementById('bgMusic');
+const toggle=document.querySelector('.music-toggle');
+let musicOn=true;
+function toggleMusic(){
+  if(musicOn){ music.pause(); toggle.textContent="🎵 Music: OFF"; }
+  else{ music.play(); toggle.textContent="🎵 Music: ON"; }
+  musicOn=!musicOn;
+}
 
-// Render all items
-for(const [key,arr] of Object.entries(data)){
-  const container=document.getElementById(key==='services'?'services-grid':key);
-  arr.forEach(item=>{
-    const el=document.createElement('div');
-    el.className='product';
-    el.innerHTML=`<div class="thumb">📦</div><div class="p-info"><h4>${item.name}</h4><p>${item.desc}</p></div>`;
-    container.appendChild(el);
-  });
+// Particles
+const canvas=document.getElementById('particles');
+const ctx=canvas.getContext('2d');
+let w,h,particles=[];
+function resize(){ w=canvas.width=window.innerWidth; h=canvas.height=window.innerHeight; }
+window.addEventListener('resize',resize); resize();
+
+class Particle{
+  constructor(x,y,vx,vy,size,color){
+    this.x=x||Math.random()*w;
+    this.y=y||Math.random()*h;
+    this.vx=vx!==undefined?vx:(Math.random()-0.5)*1;
+    this.vy=vy!==undefined?vy:(Math.random()-0.5)*1;
+    this.size=size||Math.random()*2+0.5;
+    this.color=color||"hsl(180,100%,50%)";
+  }
+  draw(){
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+    ctx.fillStyle=this.color;
+    ctx.fill();
+  }
+  update(){
+    this.x+=this.vx;
+    this.y+=this.vy;
+    if(this.x<0||this.x>w)this.vx*=-1;
+    if(this.y<0||this.y>h)this.vy*=-1;
+  }
+}
+for(let i=0;i<120;i++)particles.push(new Particle());
+function animate(){
+  ctx.fillStyle="rgba(0,0,0,0.15)";
+  ctx.fillRect(0,0,w,h);
+  particles.forEach(p=>{p.update();p.draw();});
+  requestAnimationFrame(animate);
+}
+animate();
+
+// Blast
+function triggerBlast(){
+  const blastParticles=[];
+  for(let i=0;i<150;i++){
+    const angle=Math.random()*Math.PI*2;
+    const speed=Math.random()*8+2;
+    blastParticles.push(new Particle(w/2,h/2,Math.cos(angle)*speed,Math.sin(angle)*speed,Math.random()*3+1,'#ff0000'));
+  }
+  let frames=0;
+  function blastAnim(){
+    ctx.fillStyle='rgba(0,0,0,0.2)';
+    ctx.fillRect(0,0,w,h);
+    blastParticles.forEach(p=>{p.update();p.draw();});
+    frames++;
+    if(frames<30) requestAnimationFrame(blastAnim);
+  }
+  blastAnim();
 }
 </script>
+
 </body>
 </html>
